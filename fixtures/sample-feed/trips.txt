@@ -1,0 +1,6 @@
+route_id,service_id,trip_id,trip_headsign,direction_id
+R1,WEEKDAY,T1,Downtown,0
+R1,WEEKDAY,T2,Airport,1
+R2,WEEKDAY,T3,Harbor Loop,0
+R3,WEEKDAY,T4,Hilltop,0
+R3,WEEKDAY,T5,Valley,1

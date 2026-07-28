@@ -1,0 +1,12 @@
+stop_id,stop_name,stop_lat,stop_lon,wheelchair_boarding,location_type
+S1,Central Station,37.774900,-122.419400,1,0
+S2,Market & 5th,37.789000,-122.401000,1,0
+S3,Oak Street,37.795000,-122.393000,2,0
+S4,Pine Avenue,37.800000,-122.388000,0,0
+S5,Harbor Pier,37.806000,-122.410000,2,0
+S6,Waterfront Plaza,37.808000,-122.415000,2,0
+S7,Marina Drive,37.810000,-122.420000,2,0
+S8,Hilltop Summit,37.820000,-122.430000,2,0
+S9,Valley View,37.815000,-122.425000,2,0
+S10,Depot Hub,37.770000,-122.425000,invalid,0
+ENTRANCE1,Central Station Entrance,37.774950,-122.419450,1,2

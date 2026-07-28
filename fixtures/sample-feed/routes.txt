@@ -1,0 +1,4 @@
+route_id,agency_id,route_short_name,route_long_name,route_type
+R1,DEMO,1,Downtown Express,3
+R2,DEMO,2,Harbor Loop,3
+R3,DEMO,3,Hilltop Local,3

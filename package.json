@@ -1,0 +1,29 @@
+{
+  "name": "gtfs-accessibility-auditor",
+  "version": "1.0.0",
+  "description": "CLI that audits GTFS feeds for wheelchair-accessibility coverage, data quality, and route-level gaps",
+  "type": "module",
+  "bin": {
+    "gtfs-a11y-audit": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "audit": "node dist/cli.js audit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "fast-check": "^3.23.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
