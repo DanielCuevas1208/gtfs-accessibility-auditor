@@ -1,138 +1,166 @@
 # GTFS Accessibility Auditor
 
-A production-quality TypeScript CLI that audits public-transit [GTFS](https://gtfs.org/) feeds for wheelchair-accessibility coverage, data quality, and actionable route-level gaps. It streams CSV ingestion for large feeds, produces explainable scores, and generates JSON and HTML reports.
+This TypeScript command-line tool checks wheelchair data in a General Transit Feed Specification feed.
 
-## Problem
+The tool finds missing data, incorrect values, and route-level accessibility gaps. It creates JSON and HTML reports.
 
-Transit agencies publish GTFS feeds with a `wheelchair_boarding` field on stops, but coverage is often incomplete and inconsistent. Planners and advocates need a fast, local tool that answers:
+The tool does not need an API key or an external service.
 
-- How much of the feed has known accessibility data?
-- What share of stops are marked accessible?
-- Are there data-quality problems (invalid values, orphans, duplicates)?
-- Which routes have no accessible stops or serve mostly inaccessible locations?
+## Results
 
-This tool answers those questions with deterministic scoring and human-readable explanations—no external services or API keys required.
+The audit gives these results:
 
-## Design choices
+- Wheelchair-data coverage for passenger boarding locations
+- The quantity of accessible and inaccessible stops
+- Invalid values and duplicate stop identifiers
+- Stop times that refer to missing stops
+- Trips that do not have stop times
+- Routes that have critical accessibility gaps
+- An explained score from 0 through 100
 
-| Area | Choice | Rationale |
-|------|--------|-----------|
-| Runtime | Node.js 18+ (ESM) | Ubiquitous, strong streaming I/O |
-| Language | Strict TypeScript | Type safety for GTFS entities and audit results |
-| CSV ingestion | Native `readline` streams | True line-by-line streaming without extra runtime deps |
-| Scoring | Weighted, explainable components | Each sub-score has a label, weight, raw value, and narrative |
-| Reports | JSON (machine) + HTML (human) | Self-contained HTML with inline CSS; JSON for pipelines |
-| Tests | Vitest + fast-check | Unit, integration, and property-based coverage |
+## Score
 
-### Scoring model
+The tool calculates four score parts.
 
-The overall score (0–100, grade A–F) combines four weighted components:
+| Score part | Weight |
+|---|---:|
+| Accessibility data coverage | 35 percent |
+| Accessible stop share | 35 percent |
+| Data quality | 20 percent |
+| Route-level accessibility | 10 percent |
 
-1. **Accessibility data coverage** (35%) — share of boarding stops with a known `wheelchair_boarding` value (1 or 2, not missing/invalid).
-2. **Accessible stop share** (35%) — among stops with known status, how many are marked accessible (1).
-3. **Data quality** (20%) — penalties for invalid values, duplicate IDs, orphan references, trips without stops.
-4. **Route-level equity** (10%) — penalties for routes with critical or warning-level accessibility gaps.
+Each score part has a label, a value, and an explanation.
 
-Each component includes an explanation string suitable for reports and stakeholder briefings.
+## Requirements
 
-### Route gap types
+- Node.js 18 or later
+- A GTFS feed directory
 
-- `no_accessible_stops` — route serves stops but none are marked accessible (critical).
-- `all_unknown` — every served stop lacks accessibility data (warning).
-- `majority_inaccessible` — more inaccessible than accessible stops on the route (warning).
+The feed must contain these files:
 
-## Setup
+- `routes.txt`
+- `stops.txt`
+- `trips.txt`
+- `stop_times.txt`
 
-**Prerequisites:** Node.js 18 or later.
+The tool also reads `agency.txt` when the file is available.
 
-```bash
-git clone <repo-url>
-cd gtfs-accessibility-auditor
-npm install
-npm run build
-```
+## Installation
 
-## Usage
+1. Clone the repository.
 
-Audit a GTFS feed directory (folder containing `stops.txt`, `routes.txt`, `trips.txt`, `stop_times.txt`):
+   ```bash
+   git clone https://github.com/DanielCuevas1208/gtfs-accessibility-auditor.git
+   ```
+
+2. Go to the project directory.
+
+   ```bash
+   cd gtfs-accessibility-auditor
+   ```
+
+3. Install the dependencies.
+
+   ```bash
+   npm install
+   ```
+
+4. Build the tool.
+
+   ```bash
+   npm run build
+   ```
+
+## Use
+
+Audit the sample feed.
 
 ```bash
 npm run audit -- ./fixtures/sample-feed
 ```
 
-Or after building:
+Audit another feed.
 
 ```bash
-node dist/cli.js audit ./fixtures/sample-feed
+node dist/cli.js audit ./my-feed
 ```
 
-### Options
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `--output`, `-o` | Report output directory | `./report-output` |
-| `--format`, `-f` | `json`, `html`, or `both` | `both` |
-
-### Examples
+Write only a JSON report.
 
 ```bash
-# JSON report only
-node dist/cli.js audit ./my-feed -o ./reports -f json
-
-# HTML report only
-node dist/cli.js audit ./my-feed -f html
+node dist/cli.js audit ./my-feed --output ./reports --format json
 ```
 
-### Sample output
-
-```
-Loading GTFS feed from .../fixtures/sample-feed...
-Loaded 11 stops, 3 routes, 5 trips, 17 stop_times
-Running accessibility audit...
-
-Score: 62/100 (Grade D)
-Overall accessibility score: 62/100 (grade D). Weakest area: Accessible stop share (20/100).
-
-Issues: 2 (2 route gaps)
-Reports written:
-  .../report-output/accessibility-audit.json
-  .../report-output/accessibility-audit.html
-```
-
-Open `accessibility-audit.html` in a browser for a visual summary with coverage metrics, score breakdown, route gaps, and issue tables.
-
-## Development
+Write only an HTML report.
 
 ```bash
-npm test          # Run all tests (unit + property + integration)
-npm run typecheck # TypeScript check without emit
-npm run build     # Compile to dist/
-npm run test:watch
+node dist/cli.js audit ./my-feed --format html
 ```
 
-## Project structure
+The default output directory is `./report-output`. The default format is `both`.
 
-```
-src/
-  ingest/       Streaming CSV reader and GTFS loader
-  audit/        Coverage, data quality, route gaps
-  scoring/      Explainable weighted score
-  reports/      JSON and HTML generators
-  types/        GTFS and audit type definitions
-  cli.ts        CLI entry point
-fixtures/
-  sample-feed/  Demo GTFS feed with intentional gaps
-tests/          Unit, property-based, and integration tests
+## Test
+
+Run the automated tests.
+
+```bash
+npm test
 ```
 
-## Limitations
+Run the TypeScript check.
 
-- **Stop-level only** — does not evaluate `trips.wheelchair_accessible` or pathway/elevator data from GTFS Pathways extensions.
-- **No geospatial analysis** — does not measure sidewalk quality, grade, or distance to accessible alternatives.
-- **In-memory graph** — while CSV files are streamed, the full feed is held in memory after load. Very large feeds (millions of `stop_times` rows) may require additional optimization.
-- **Single agency** — scoring assumes one feed per run; multi-agency consolidation is out of scope.
-- **GTFS subset** — requires core files only; optional files (`calendar`, `shapes`, etc.) are ignored.
+```bash
+npm run typecheck
+```
+
+Run the build.
+
+```bash
+npm run build
+```
+
+The test suite contains unit tests, integration tests, and property-based tests.
+
+## Design
+
+The CSV reader processes one line at a time. This design decreases the temporary memory requirement during file input.
+
+The audit then keeps the parsed feed in memory. This design makes route analysis simple and deterministic.
+
+The HTML report contains its style data. You can open the report without a web server.
+
+The JSON report supports other tools and automated pipelines.
+
+## Project directories
+
+| Directory | Contents |
+|---|---|
+| `src/ingest` | CSV reader and GTFS loader |
+| `src/audit` | Coverage, data quality, and route checks |
+| `src/scoring` | Explained score calculation |
+| `src/reports` | JSON and HTML report writers |
+| `src/types` | GTFS and report types |
+| `fixtures` | A small feed with known gaps |
+| `tests` | Automated tests |
+
+## Limits
+
+- The tool does not check `wheelchair_accessible` in `trips.txt`.
+- The tool does not check GTFS Pathways data.
+- The tool does not do geospatial analysis.
+- The tool keeps the parsed feed in memory.
+- The tool checks one feed during each run.
+
+## Documentation language
+
+This documentation follows the principal writing rules in ASD-STE100 Issue 9.
+
+Instructions have 20 words or fewer. Descriptive sentences have 25 words or fewer.
+
+The text uses active voice and short paragraphs. GTFS terms and software names are technical nouns.
+
+This project does not claim formal ASD-STE100 certification.
 
 ## License
 
-MIT
+The MIT License applies to this project. Refer to [LICENSE](LICENSE).
