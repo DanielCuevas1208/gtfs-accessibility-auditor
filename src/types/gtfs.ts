@@ -1,6 +1,9 @@
 /** GTFS wheelchair_boarding values per the spec. */
 export type WheelchairBoarding = 0 | 1 | 2;
 
+/** GTFS wheelchair_accessible values for trips per the spec. */
+export type WheelchairAccessible = 0 | 1 | 2;
+
 export interface Agency {
   agency_id?: string;
   agency_name: string;
@@ -32,6 +35,7 @@ export interface Trip {
   trip_id: string;
   trip_headsign?: string;
   direction_id?: string;
+  wheelchair_accessible?: string;
 }
 
 export interface StopTime {
@@ -83,4 +87,11 @@ export function wheelchairLabel(value: WheelchairBoarding | null): string {
     default:
       return "missing";
   }
+}
+
+/** Parse a GTFS trips.txt wheelchair_accessible value into 0, 1, 2, or null. */
+export function parseWheelchairAccessible(
+  value: string | undefined
+): WheelchairAccessible | null {
+  return parseWheelchairBoarding(value);
 }

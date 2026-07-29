@@ -6,6 +6,21 @@
   "bin": {
     "gtfs-a11y-audit": "./dist/cli.js"
   },
+  "keywords": [
+    "gtfs",
+    "accessibility",
+    "wheelchair",
+    "transit",
+    "cli",
+    "audit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DanielCuevas1208/gtfs-accessibility-auditor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DanielCuevas1208/gtfs-accessibility-auditor/issues"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli.js",

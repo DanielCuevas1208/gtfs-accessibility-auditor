@@ -6,10 +6,12 @@ import type {
   CoverageMetrics,
   DataQualitySummary,
   RouteGap,
+  TripAccessibilitySummary,
 } from "../types/audit.js";
 import { auditCoverage } from "./coverage.js";
 import { auditDataQuality } from "./dataQuality.js";
 import { auditRouteGaps } from "./routeGaps.js";
+import { auditTripAccessibility } from "./tripAccessibility.js";
 import { computeAccessibilityScore } from "../scoring/scorer.js";
 
 export interface AuditOptions {
@@ -19,9 +21,15 @@ export interface AuditOptions {
 export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
   const coverage = auditCoverage(feed);
   const dataQuality = auditDataQuality(feed);
+  const tripAccessibility = auditTripAccessibility(feed);
   const routeGaps = auditRouteGaps(feed);
-  const issues = collectIssues(coverage, dataQuality, routeGaps);
-  const score = computeAccessibilityScore(coverage, dataQuality, routeGaps);
+  const issues = collectIssues(coverage, dataQuality, tripAccessibility, routeGaps);
+  const score = computeAccessibilityScore(
+    coverage,
+    dataQuality,
+    routeGaps,
+    tripAccessibility
+  );
 
   const agencyName =
     feed.agencies[0]?.agency_name ?? "Unknown Agency";
@@ -32,6 +40,7 @@ export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
     agencyName,
     coverage,
     dataQuality,
+    tripAccessibility,
     routeGaps,
     issues,
     score,
@@ -41,9 +50,13 @@ export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
 function collectIssues(
   coverage: CoverageMetrics,
   dataQuality: DataQualitySummary,
+  tripAccessibility: TripAccessibilitySummary,
   routeGaps: RouteGap[]
 ): AuditIssue[] {
-  const issues: AuditIssue[] = [...dataQuality.issues];
+  const issues: AuditIssue[] = [
+    ...dataQuality.issues,
+    ...tripAccessibility.issues,
+  ];
 
   if (coverage.missing > 0) {
     issues.push({
@@ -54,6 +67,21 @@ function collectIssues(
       field: "wheelchair_boarding",
       recommendation:
         "Populate wheelchair_boarding for all passenger boarding locations.",
+    });
+  }
+
+  if (tripAccessibility.totalTrips > 0 && tripAccessibility.missing > 0) {
+    issues.push({
+      code: "MISSING_TRIP_WHEELCHAIR_DATA",
+      severity:
+        tripAccessibility.missing > tripAccessibility.totalTrips * 0.5
+          ? "critical"
+          : "warning",
+      message: `${tripAccessibility.missing} of ${tripAccessibility.totalTrips} trips lack wheelchair_accessible`,
+      entityType: "feed",
+      field: "wheelchair_accessible",
+      recommendation:
+        "Populate wheelchair_accessible for every published trip.",
     });
   }
 

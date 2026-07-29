@@ -45,6 +45,18 @@ export interface DataQualitySummary {
   issues: AuditIssue[];
 }
 
+export interface TripAccessibilitySummary {
+  totalTrips: number;
+  accessible: number;
+  notAccessible: number;
+  unknown: number;
+  missing: number;
+  invalid: number;
+  coverageRate: number;
+  accessibleRate: number;
+  issues: AuditIssue[];
+}
+
 export interface ScoreComponent {
   id: string;
   label: string;
@@ -67,6 +79,7 @@ export interface AuditReport {
   agencyName: string;
   coverage: CoverageMetrics;
   dataQuality: DataQualitySummary;
+  tripAccessibility: TripAccessibilitySummary;
   routeGaps: RouteGap[];
   issues: AuditIssue[];
   score: AccessibilityScore;

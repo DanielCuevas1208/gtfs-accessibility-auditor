@@ -63,7 +63,7 @@ function renderRouteGaps(gaps: RouteGap[]): string {
 }
 
 export function renderHtmlReport(report: AuditReport): string {
-  const { coverage, score, dataQuality } = report;
+  const { coverage, score, dataQuality, tripAccessibility } = report;
   const components = score.components
     .map(
       (c) => `<div class="component">
@@ -71,7 +71,7 @@ export function renderHtmlReport(report: AuditReport): string {
         <strong>${escapeHtml(c.label)}</strong>
         <span>${Math.round(c.rawScore)}/100 (weight ${Math.round(c.weight * 100)}%)</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${c.rawScore}%"></div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, c.rawScore))}%"></div></div>
       <p class="explanation">${escapeHtml(c.explanation)}</p>
     </div>`
     )
@@ -135,6 +135,19 @@ export function renderHtmlReport(report: AuditReport): string {
   <div class="card">
     <h2>Data quality</h2>
     <p>${dataQuality.issues.length} issue(s): ${dataQuality.invalidWheelchairValues} invalid values, ${dataQuality.duplicateStopIds} duplicates, ${dataQuality.orphanStopTimes} orphan references.</p>
+  </div>
+
+  <div class="card">
+    <h2>Trip accessibility</h2>
+    <div class="metrics">
+      <div class="metric"><strong>${tripAccessibility.totalTrips}</strong>Trips</div>
+      <div class="metric"><strong>${tripAccessibility.accessible}</strong>Accessible</div>
+      <div class="metric"><strong>${tripAccessibility.notAccessible}</strong>Not accessible</div>
+      <div class="metric"><strong>${tripAccessibility.unknown}</strong>Unknown (0)</div>
+      <div class="metric"><strong>${tripAccessibility.missing}</strong>Missing field</div>
+      <div class="metric"><strong>${tripAccessibility.invalid}</strong>Invalid values</div>
+      <div class="metric"><strong>${Math.round(tripAccessibility.coverageRate * 100)}%</strong>Data coverage</div>
+    </div>
   </div>
 
   <div class="card">

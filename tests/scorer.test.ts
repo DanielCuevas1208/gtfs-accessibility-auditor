@@ -4,6 +4,7 @@ import { loadGtfsFeed } from "../src/ingest/gtfsLoader.js";
 import { auditCoverage } from "../src/audit/coverage.js";
 import { auditDataQuality } from "../src/audit/dataQuality.js";
 import { auditRouteGaps } from "../src/audit/routeGaps.js";
+import { auditTripAccessibility } from "../src/audit/tripAccessibility.js";
 import { computeAccessibilityScore } from "../src/scoring/scorer.js";
 
 const FIXTURE = join(import.meta.dirname, "../fixtures/sample-feed");
@@ -14,16 +15,28 @@ describe("computeAccessibilityScore", () => {
     const coverage = auditCoverage(feed);
     const dataQuality = auditDataQuality(feed);
     const routeGaps = auditRouteGaps(feed);
+    const trips = auditTripAccessibility(feed);
 
-    const score = computeAccessibilityScore(coverage, dataQuality, routeGaps);
+    const score = computeAccessibilityScore(
+      coverage,
+      dataQuality,
+      routeGaps,
+      trips
+    );
 
+    expect(score.overall).toBe(61);
     expect(score.overall).toBeGreaterThanOrEqual(0);
     expect(score.overall).toBeLessThanOrEqual(100);
     expect(score.grade).toMatch(/^[A-F]$/);
-    expect(score.components).toHaveLength(4);
+    expect(score.components).toHaveLength(5);
     expect(score.components.reduce((s, c) => s + c.weight, 0)).toBeCloseTo(1, 5);
 
-    const recomputed = computeAccessibilityScore(coverage, dataQuality, routeGaps);
+    const recomputed = computeAccessibilityScore(
+      coverage,
+      dataQuality,
+      routeGaps,
+      trips
+    );
     expect(recomputed.overall).toBe(score.overall);
     expect(recomputed.grade).toBe(score.grade);
   });

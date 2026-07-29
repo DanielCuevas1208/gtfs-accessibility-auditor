@@ -3,6 +3,7 @@ export { parseCsvLine, streamCsvFile } from "./ingest/streamReader.js";
 export { auditCoverage, buildStopAccessibilityMap } from "./audit/coverage.js";
 export { auditDataQuality } from "./audit/dataQuality.js";
 export { auditRouteGaps } from "./audit/routeGaps.js";
+export { auditTripAccessibility } from "./audit/tripAccessibility.js";
 export { runAudit } from "./audit/runAudit.js";
 export { computeAccessibilityScore } from "./scoring/scorer.js";
 export { serializeReportJson, writeJsonReport } from "./reports/jsonReport.js";

@@ -12,6 +12,7 @@ The audit gives these results:
 
 - Wheelchair-data coverage for passenger boarding locations
 - The quantity of accessible and inaccessible stops
+- Trip wheelchair accessibility coverage from `trips.txt`
 - Invalid values and duplicate stop identifiers
 - Stop times that refer to missing stops
 - Trips that do not have stop times
@@ -20,13 +21,14 @@ The audit gives these results:
 
 ## Score
 
-The tool calculates four score parts.
+The tool calculates five score parts.
 
 | Score part | Weight |
 |---|---:|
-| Accessibility data coverage | 35 percent |
-| Accessible stop share | 35 percent |
-| Data quality | 20 percent |
+| Accessibility data coverage | 30 percent |
+| Accessible stop share | 30 percent |
+| Data quality | 15 percent |
+| Trip accessibility data | 15 percent |
 | Route-level accessibility | 10 percent |
 
 Each score part has a label, a value, and an explanation.
@@ -99,6 +101,19 @@ node dist/cli.js audit ./my-feed --format html
 
 The default output directory is `./report-output`. The default format is `both`.
 
+## Sample output
+
+Audit the included fixture and read the score line.
+
+```text
+Score: 61/100 (Grade D)
+Overall accessibility score: 61/100 (grade D). Weakest area: Accessible stop share (20/100).
+
+Issues: 4 (2 route gaps)
+```
+
+The JSON report has a `tripAccessibility` object. It shows the trip counts, the coverage rate, and the invalid values. The HTML report has a `Trip accessibility` card with the same data.
+
 ## Test
 
 Run the automated tests.
@@ -136,16 +151,19 @@ The JSON report supports other tools and automated pipelines.
 | Directory | Contents |
 |---|---|
 | `src/ingest` | CSV reader and GTFS loader |
-| `src/audit` | Coverage, data quality, and route checks |
+| `src/audit` | Coverage, data quality, trip, and route checks |
 | `src/scoring` | Explained score calculation |
 | `src/reports` | JSON and HTML report writers |
 | `src/types` | GTFS and report types |
 | `fixtures` | A small feed with known gaps |
 | `tests` | Automated tests |
 
+## Roadmap
+
+Refer to [ROADMAP.md](ROADMAP.md) for the release plan and the remaining work.
+
 ## Limits
 
-- The tool does not check `wheelchair_accessible` in `trips.txt`.
 - The tool does not check GTFS Pathways data.
 - The tool does not do geospatial analysis.
 - The tool keeps the parsed feed in memory.

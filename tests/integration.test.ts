@@ -16,9 +16,13 @@ describe("integration", () => {
 
     expect(report.agencyName).toBe("Metro Valley Transit");
     expect(report.coverage.boardingStops).toBe(10);
-    expect(report.issues).toHaveLength(2);
+    expect(report.tripAccessibility.totalTrips).toBe(5);
+    expect(report.tripAccessibility.accessible).toBe(1);
+    expect(report.tripAccessibility.invalid).toBe(1);
+    expect(report.tripAccessibility.missing).toBe(1);
+    expect(report.issues).toHaveLength(4);
     expect(report.routeGaps).toHaveLength(2);
-    expect(report.score.overall).toBe(62);
+    expect(report.score.overall).toBe(61);
     expect(report.score.grade).toBe("D");
   });
 
@@ -34,6 +38,7 @@ describe("integration", () => {
     expect(html).toContain("GTFS Accessibility Audit");
     expect(html).toContain("Metro Valley Transit");
     expect(html).toContain(report.score.grade);
+    expect(html).toContain("Trip accessibility");
   });
 
   it("writes reports to a temp directory", async () => {

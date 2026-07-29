@@ -4,12 +4,15 @@ import type {
   DataQualitySummary,
   RouteGap,
   ScoreComponent,
+  TripAccessibilitySummary,
 } from "../types/audit.js";
+import { EMPTY_TRIP_SUMMARY } from "../audit/tripAccessibility.js";
 
 const WEIGHTS = {
-  coverage: 0.35,
-  accessibility: 0.35,
-  dataQuality: 0.2,
+  coverage: 0.3,
+  accessibility: 0.3,
+  dataQuality: 0.15,
+  tripAccessibility: 0.15,
   routeEquity: 0.1,
 } as const;
 
@@ -118,15 +121,40 @@ function scoreRouteEquity(routeGaps: RouteGap[]): ScoreComponent {
   };
 }
 
+function scoreTripAccessibility(
+  trips: TripAccessibilitySummary
+): ScoreComponent {
+  const rawScore = trips.coverageRate * 100;
+  const covered =
+    trips.accessible + trips.notAccessible + trips.unknown;
+
+  const explanation =
+    trips.totalTrips === 0
+      ? "No trips found; trip accessibility data cannot be assessed."
+      : `${Math.round(trips.coverageRate * 100)}% of trips have a known wheelchair_accessible status ` +
+        `(${covered} valid, ${trips.missing} missing, ${trips.invalid} invalid).`;
+
+  return {
+    id: "trip_accessibility",
+    label: "Trip accessibility data",
+    weight: WEIGHTS.tripAccessibility,
+    rawScore,
+    weightedScore: rawScore * WEIGHTS.tripAccessibility,
+    explanation,
+  };
+}
+
 export function computeAccessibilityScore(
   coverage: CoverageMetrics,
   dataQuality: DataQualitySummary,
-  routeGaps: RouteGap[]
+  routeGaps: RouteGap[],
+  tripAccessibility: TripAccessibilitySummary = EMPTY_TRIP_SUMMARY
 ): AccessibilityScore {
   const components = [
     scoreCoverage(coverage),
     scoreAccessibility(coverage),
     scoreDataQuality(dataQuality),
+    scoreTripAccessibility(tripAccessibility),
     scoreRouteEquity(routeGaps),
   ];
 
