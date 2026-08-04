@@ -1,0 +1,3 @@
+pathway_id,from_stop_id,to_stop_id,pathway_mode,is_bidirectional,traversal_time
+entrance_walk,ENTRANCE1,S1,1,1,30
+stairs_to_s2,ENTRANCE1,S2,2,1,20
