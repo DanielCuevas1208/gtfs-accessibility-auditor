@@ -23,4 +23,4 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - name: Run the audit on the sample feed
-        run: node dist/cli.js audit ./fixtures/sample-feed --format json
+        run: npm run audit -- ./fixtures/sample-feed --format json --output ./report-output

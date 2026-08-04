@@ -3,6 +3,8 @@ import { join } from "node:path";
 import {
   type Agency,
   type GtfsFeed,
+  type Level,
+  type Pathway,
   type Route,
   type Stop,
   type StopTime,
@@ -49,6 +51,16 @@ export async function loadGtfsFeed(feedPath: string): Promise<GtfsFeed> {
   const stops: Stop[] = [];
   const trips: Trip[] = [];
   const stopTimes: StopTime[] = [];
+  const pathways: Pathway[] | undefined = await fileExists(
+    join(feedPath, "pathways.txt")
+  )
+    ? []
+    : undefined;
+  const levels: Level[] | undefined = await fileExists(
+    join(feedPath, "levels.txt")
+  )
+    ? []
+    : undefined;
 
   if (await fileExists(join(feedPath, "agency.txt"))) {
     await streamCsvFile(join(feedPath, "agency.txt"), {
@@ -77,7 +89,21 @@ export async function loadGtfsFeed(feedPath: string): Promise<GtfsFeed> {
     onRow: (row) => stopTimes.push(rowToTyped<StopTime>(row)),
   });
 
-  return { agencies, routes, stops, trips, stopTimes };
+  if (pathways) {
+    await streamCsvFile(join(feedPath, "pathways.txt"), {
+      onHeader: () => {},
+      onRow: (row) => pathways.push(rowToTyped<Pathway>(row)),
+    });
+  }
+
+  if (levels) {
+    await streamCsvFile(join(feedPath, "levels.txt"), {
+      onHeader: () => {},
+      onRow: (row) => levels.push(rowToTyped<Level>(row)),
+    });
+  }
+
+  return { agencies, routes, stops, trips, stopTimes, pathways, levels };
 }
 
 /** Count rows in a GTFS file via streaming without retaining them. */

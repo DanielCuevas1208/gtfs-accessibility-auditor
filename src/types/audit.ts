@@ -57,6 +57,34 @@ export interface TripAccessibilitySummary {
   issues: AuditIssue[];
 }
 
+export interface PathwayGap {
+  stationId?: string;
+  stopId: string;
+  stopName: string;
+  reason: "no_accessible_entrance" | "no_accessible_path";
+  severity: Severity;
+  recommendation: string;
+}
+
+export interface PathwaysSummary {
+  pathwaysFilePresent: boolean;
+  levelsFilePresent: boolean;
+  pathwayCount: number;
+  levelCount: number;
+  stationCount: number;
+  accessibleEntranceCount: number;
+  platformCount: number;
+  reachablePlatformCount: number;
+  unreachablePlatformCount: number;
+  unlinkedLocationCount: number;
+  invalidPathways: number;
+  invalidLevels: number;
+  elevatorPathwayCount: number;
+  coverageRate: number;
+  gaps: PathwayGap[];
+  issues: AuditIssue[];
+}
+
 export interface ScoreComponent {
   id: string;
   label: string;
@@ -80,6 +108,7 @@ export interface AuditReport {
   coverage: CoverageMetrics;
   dataQuality: DataQualitySummary;
   tripAccessibility: TripAccessibilitySummary;
+  pathways: PathwaysSummary;
   routeGaps: RouteGap[];
   issues: AuditIssue[];
   score: AccessibilityScore;
