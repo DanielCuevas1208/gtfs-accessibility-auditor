@@ -2,6 +2,7 @@ export { loadGtfsFeed, validateFeedDirectory, GtfsLoadError } from "./ingest/gtf
 export { parseCsvLine, streamCsvFile } from "./ingest/streamReader.js";
 export { auditCoverage, buildStopAccessibilityMap } from "./audit/coverage.js";
 export { auditDataQuality } from "./audit/dataQuality.js";
+export { auditPathways } from "./audit/pathways.js";
 export { auditRouteGaps } from "./audit/routeGaps.js";
 export { auditTripAccessibility } from "./audit/tripAccessibility.js";
 export { runAudit } from "./audit/runAudit.js";

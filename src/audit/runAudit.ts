@@ -5,11 +5,13 @@ import type {
   AuditReport,
   CoverageMetrics,
   DataQualitySummary,
+  PathwaysSummary,
   RouteGap,
   TripAccessibilitySummary,
 } from "../types/audit.js";
 import { auditCoverage } from "./coverage.js";
 import { auditDataQuality } from "./dataQuality.js";
+import { auditPathways } from "./pathways.js";
 import { auditRouteGaps } from "./routeGaps.js";
 import { auditTripAccessibility } from "./tripAccessibility.js";
 import { computeAccessibilityScore } from "../scoring/scorer.js";
@@ -22,8 +24,15 @@ export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
   const coverage = auditCoverage(feed);
   const dataQuality = auditDataQuality(feed);
   const tripAccessibility = auditTripAccessibility(feed);
+  const pathways = auditPathways(feed);
   const routeGaps = auditRouteGaps(feed);
-  const issues = collectIssues(coverage, dataQuality, tripAccessibility, routeGaps);
+  const issues = collectIssues(
+    coverage,
+    dataQuality,
+    tripAccessibility,
+    pathways,
+    routeGaps
+  );
   const score = computeAccessibilityScore(
     coverage,
     dataQuality,
@@ -31,8 +40,7 @@ export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
     tripAccessibility
   );
 
-  const agencyName =
-    feed.agencies[0]?.agency_name ?? "Unknown Agency";
+  const agencyName = feed.agencies[0]?.agency_name ?? "Unknown Agency";
 
   return {
     generatedAt: new Date().toISOString(),
@@ -41,6 +49,7 @@ export function runAudit(feed: GtfsFeed, options: AuditOptions): AuditReport {
     coverage,
     dataQuality,
     tripAccessibility,
+    pathways,
     routeGaps,
     issues,
     score,
@@ -51,17 +60,20 @@ function collectIssues(
   coverage: CoverageMetrics,
   dataQuality: DataQualitySummary,
   tripAccessibility: TripAccessibilitySummary,
+  pathways: PathwaysSummary,
   routeGaps: RouteGap[]
 ): AuditIssue[] {
   const issues: AuditIssue[] = [
     ...dataQuality.issues,
     ...tripAccessibility.issues,
+    ...pathways.issues,
   ];
 
   if (coverage.missing > 0) {
     issues.push({
       code: "MISSING_WHEELCHAIR_DATA",
-      severity: coverage.missing > coverage.totalStops * 0.5 ? "critical" : "warning",
+      severity:
+        coverage.missing > coverage.totalStops * 0.5 ? "critical" : "warning",
       message: `${coverage.missing} of ${coverage.totalStops} boarding stops lack wheelchair_boarding`,
       entityType: "feed",
       field: "wheelchair_boarding",

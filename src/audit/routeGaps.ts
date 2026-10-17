@@ -9,7 +9,7 @@ function routeDisplayName(
   longName?: string
 ): string {
   if (shortName && longName) {
-    return `${shortName} – ${longName}`;
+    return `${shortName} - ${longName}`;
   }
   return shortName ?? longName ?? routeId;
 }
